@@ -34,25 +34,23 @@ interface AnnualTemperatureChartProps {
 }
 
 export default function AnnualTemperatureChart({ 
-  data, 
-  showTrendLine = false,
-  trendLineStyle = 'solid'
+  data
 }: AnnualTemperatureChartProps) {
   const [showProphet, setShowProphet] = useState(true);
 
-  // 温暖化トレンドライン計算
-  const calculateTrendLine = (annualData: AnnualData[]) => {
-    const n = annualData.length;
-    const sumX = annualData.reduce((sum, item) => sum + item.year, 0);
-    const sumY = annualData.reduce((sum, item) => sum + item.avg_max_temp, 0);
-    const sumXY = annualData.reduce((sum, item) => sum + item.year * item.avg_max_temp, 0);
-    const sumXX = annualData.reduce((sum, item) => sum + item.year * item.year, 0);
-    
-    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
-    
-    return annualData.map(item => slope * item.year + intercept);
-  };
+  // 温暖化トレンドライン計算（将来的に使用予定）
+  // const calculateTrendLine = (annualData: AnnualData[]) => {
+  //   const n = annualData.length;
+  //   const sumX = annualData.reduce((sum, item) => sum + item.year, 0);
+  //   const sumY = annualData.reduce((sum, item) => sum + item.avg_max_temp, 0);
+  //   const sumXY = annualData.reduce((sum, item) => sum + item.year * item.avg_max_temp, 0);
+  //   const sumXX = annualData.reduce((sum, item) => sum + item.year * item.year, 0);
+  //   
+  //   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+  //   const intercept = (sumY - slope * sumX) / n;
+  //   
+  //   return annualData.map(item => slope * item.year + intercept);
+  // };
 
   const labels = data.map(d => d.year.toString());
   const maxTemps = data.map(d => d.avg_max_temp);

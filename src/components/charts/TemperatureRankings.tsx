@@ -109,10 +109,10 @@ export default function TemperatureRankings({ data }: TemperatureRankingsProps) 
   }
   
   const tabs = [
-    { id: 'yearly', label: '年別ランキング' },
-    { id: 'daily', label: '日別記録' },
-    { id: 'monthly', label: '月別記録' },
-    { id: 'anomaly', label: '異常年' }
+    { id: 'yearly' as const, label: '年別ランキング' },
+    { id: 'daily' as const, label: '日別記録' },
+    { id: 'monthly' as const, label: '月別記録' },
+    { id: 'anomaly' as const, label: '異常年' }
   ];
 
   return (
@@ -128,7 +128,7 @@ export default function TemperatureRankings({ data }: TemperatureRankingsProps) 
         {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
               activeTab === tab.id
                 ? 'bg-blue-500 text-white'

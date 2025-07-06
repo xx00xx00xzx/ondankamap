@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: '利用規約',
@@ -192,9 +193,9 @@ export default function TermsPage() {
 
           {/* 戻るリンク */}
           <div className="text-center pt-6">
-            <a href="/" className="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+            <Link href="/" className="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
               トップページに戻る
-            </a>
+            </Link>
           </div>
         </div>
       </div>

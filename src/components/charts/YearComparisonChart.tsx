@@ -11,7 +11,13 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  Plugin,
+  ChartEvent,
+  ActiveElement,
+  TooltipItem,
+  ScriptableScaleContext,
+  Scale
 } from 'chart.js';
 
 ChartJS.register(
@@ -83,25 +89,6 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
   
   // モードに応じた表示用ラベル
   const periodLabel = comparisonMode === '30years' ? '1995-2024年平均' : '1880-2024年平均';
-  const periodDescription = comparisonMode === '30years' ? '過去30年間' : '全145年間';
-  
-  // グラフ用データの準備（日毎のデータ）
-  const labels = yearData.map((d, index) => {
-    if (selectedMonth !== null && selectedMonth !== undefined) {
-      // 月別表示の場合は日付を表示
-      return `${d.month}/${d.day}`;
-    } else {
-      // 年間表示の場合は月ラベルのみ
-      const monthStart = yearData.findIndex(item => item.month === d.month);
-      const monthEnd = yearData.findLastIndex(item => item.month === d.month);
-      const monthCenter = Math.floor((monthStart + monthEnd) / 2);
-      
-      if (index === monthCenter) {
-        return `${d.month}月`;
-      }
-      return '';
-    }
-  });
   const yearMaxTemps = yearData.map(d => d.max_temp);
   const normalMaxTemps = yearData.map(d => {
     const monthDay = `${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
@@ -203,9 +190,9 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
   ];
 
   // 月ごとの背景色を描画するプラグイン
-  const monthBackgroundPlugin = {
+  const monthBackgroundPlugin: Plugin<'line'> = {
     id: 'monthBackground',
-    beforeDraw: (chart: any) => {
+    beforeDraw: (chart: ChartJS<'line'>) => {
       const { ctx, chartArea, scales } = chart;
       if (!chartArea || !scales.x || !scales.y) return;
 
@@ -223,17 +210,18 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
   };
 
   // グラフクリックハンドラー
-  const handleChartClick = (event: any, activeElements: any[], chart: any) => {
+  const handleChartClick = (event: ChartEvent, activeElements: ActiveElement[], chart: ChartJS<'line'>) => {
     if (!onMonthClick || selectedMonth !== null) return;
     
     try {
       // クリック位置を取得
       const rect = chart.canvas.getBoundingClientRect();
-      const x = event.native ? event.native.clientX - rect.left : event.clientX - rect.left;
+      const nativeEvent = event.native as MouseEvent;
+      const x = nativeEvent ? nativeEvent.clientX - rect.left : 0;
       
       // X軸スケールからデータインデックスを計算
       const dataX = chart.scales.x.getValueForPixel(x);
-      const dataIndex = Math.round(dataX);
+      const dataIndex = Math.round(dataX || 0);
       
       console.log('Click position:', x, 'Data index:', dataIndex, 'Year data length:', yearData.length);
       
@@ -254,7 +242,7 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
       intersect: false,
       mode: 'index' as const,
     },
-    onHover: (event: any, activeElements: any[], chart: any) => {
+    onHover: (event: ChartEvent, activeElements: ActiveElement[], chart: ChartJS<'line'>) => {
       if (selectedMonth === null && onMonthClick) {
         chart.canvas.style.cursor = 'pointer';
       } else {
@@ -291,7 +279,7 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
       },
       tooltip: {
         callbacks: {
-          afterLabel: (context: any) => {
+          afterLabel: (context: TooltipItem<'line'>) => {
             if (context.datasetIndex === 0 && context.dataIndex < tempDifferences.length) {
               const diff = tempDifferences[context.dataIndex];
               if (diff !== null) {
@@ -311,17 +299,17 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
         max: yearData.length - 1,
         grid: {
           display: true,
-          color: (context: any) => {
+          color: (context: ScriptableScaleContext) => {
             // 月の境界線のみ表示
             const index = context.tick?.value;
-            if (monthBoundaries.includes(index)) {
+            if (typeof index === 'number' && monthBoundaries.includes(index)) {
               return 'rgba(0, 0, 0, 0.3)';
             }
             return 'transparent'; // 通常のグリッド線は非表示
           },
-          lineWidth: (context: any) => {
+          lineWidth: (context: ScriptableScaleContext) => {
             const index = context.tick?.value;
-            if (monthBoundaries.includes(index)) {
+            if (typeof index === 'number' && monthBoundaries.includes(index)) {
               return 2;
             }
             return 0; // 通常のグリッド線の太さを0に
@@ -331,10 +319,11 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
           font: {
             size: 12,
           },
-          callback: function(value: any) {
+          callback: function(value: string | number) {
+            const numValue = typeof value === 'string' ? parseFloat(value) : value;
             if (selectedMonth !== null && selectedMonth !== undefined) {
               // 月別表示の場合は日付を表示
-              const index = Math.floor(value);
+              const index = Math.floor(numValue);
               if (index >= 0 && index < yearData.length) {
                 const d = yearData[index];
                 return `${d.day}日`;
@@ -342,7 +331,7 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
               return '';
             } else {
               // 年間表示の場合は月ラベル
-              const index = Math.floor(value);
+              const index = Math.floor(numValue);
               const monthCenter = monthCenters.find(mc => mc.position === index);
               if (monthCenter) {
                 return `${monthCenter.month}月`;
@@ -354,8 +343,9 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
           includeBounds: false,
         },
         // 月の中心位置に明示的にtickを配置（年間表示の場合のみ）
-        afterBuildTicks: selectedMonth === null || selectedMonth === undefined ? function(scale: any) {
-          scale.ticks = monthCenters.map(mc => ({
+        afterBuildTicks: selectedMonth === null || selectedMonth === undefined ? function(scale: Scale) {
+          const scaleWithTicks = scale as Scale & { ticks: Array<{ value: number; label: string }> };
+          scaleWithTicks.ticks = monthCenters.map(mc => ({
             value: mc.position,
             label: `${mc.month}月`
           }));
@@ -368,7 +358,7 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
           color: 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
-          callback: function(value: any) {
+          callback: function(value: string | number) {
             return value + '°C';
           },
           font: {
@@ -410,7 +400,7 @@ export default function YearComparisonChart({ data, selectedYear, comparisonMode
     total: yearData.length
   };
 
-  yearData.forEach((d, i) => {
+  yearData.forEach((d) => {
     // 気温基準の統計
     if (d.max_temp >= 35) {
       temperatureStats.extremeHot++;
