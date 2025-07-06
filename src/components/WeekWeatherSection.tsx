@@ -83,7 +83,7 @@ export default function WeekWeatherSection() {
           telop: f.telop ?? "",
         }));
         setForecast(forecasts);
-      } catch (e) {
+      } catch {
         setError("天気予報データの取得に失敗しました");
       } finally {
         setLoading(false);
@@ -115,17 +115,7 @@ export default function WeekWeatherSection() {
     historicalMin: historicalAverages[i]?.avgMin,
     telop: forecast ? forecast[i].telop : ""
   }));
-  // 月平均
-  const month = forecast && forecast.length > 0 ? Number(forecast[0].date.slice(5, 7)) : null;
-  let monthlyAvgMax: number | null = null;
-  let monthlyAvgMin: number | null = null;
-  if (month) {
-    const monthRecords = rawData.filter(d => d.month === month);
-    if (monthRecords.length) {
-      monthlyAvgMax = monthRecords.reduce((sum, d) => sum + d.max_temp, 0) / monthRecords.length;
-      monthlyAvgMin = monthRecords.reduce((sum, d) => sum + d.min_temp, 0) / monthRecords.length;
-    }
-  }
+  // 使用されていない月平均の計算を削除
 
   return (
     <section className="mb-4">

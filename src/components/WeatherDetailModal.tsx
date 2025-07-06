@@ -2,7 +2,6 @@
 
 import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
-import { TemperatureData } from "@/types/temperature";
 
 interface WeatherDetailModalProps {
   isOpen: boolean;
