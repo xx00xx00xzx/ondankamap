@@ -28,6 +28,7 @@ export async function initDatabase() {
       telop TEXT,
       max_temp REAL,
       min_temp REAL,
+      is_tropical_night BOOLEAN DEFAULT 0,
       chance_of_rain_00_06 TEXT,
       chance_of_rain_06_12 TEXT,
       chance_of_rain_12_18 TEXT,
@@ -59,6 +60,7 @@ export interface WeatherForecastRecord {
   telop?: string;
   max_temp?: number | null;
   min_temp?: number | null;
+  is_tropical_night?: boolean;
   chance_of_rain_00_06?: string;
   chance_of_rain_06_12?: string;
   chance_of_rain_12_18?: string;

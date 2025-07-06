@@ -93,7 +93,8 @@ export default function WeekPage() {
     forecastMin: forecast ? forecast[i].min_temp : null,
     historicalMax: historicalAverages[i]?.avgMax,
     historicalMin: historicalAverages[i]?.avgMin,
-    telop: forecast ? forecast[i].telop : ""
+    telop: forecast ? forecast[i].telop : "",
+    isTropicalNight: forecast ? forecast[i].is_tropical_night : false
   }));
 
   // デバッグ: chartDataの中身を出力
@@ -114,15 +115,19 @@ export default function WeekPage() {
         if (!res.ok) throw new Error("APIリクエスト失敗");
         const data = await res.json();
         // livedoor/気象庁APIのforecasts配列をWeatherForecast型に変換
-        const forecasts: WeatherForecast[] = (data.forecasts || []).map((f: TsukumiForecast) => ({
-          date: f.date,
-          max_temp: f.temperature && f.temperature.max && f.temperature.max.celsius !== null ? Number(f.temperature.max.celsius) : null,
-          min_temp: f.temperature && f.temperature.min && f.temperature.min.celsius !== null ? Number(f.temperature.min.celsius) : null,
-          weather_code: 0,
-          temp_anomaly_max: 0,
-          temp_anomaly_min: 0,
-          telop: f.telop ?? "",
-        }));
+        const forecasts: WeatherForecast[] = (data.forecasts || []).map((f: TsukumiForecast) => {
+          const minTemp = f.temperature && f.temperature.min && f.temperature.min.celsius !== null ? Number(f.temperature.min.celsius) : null;
+          return {
+            date: f.date,
+            max_temp: f.temperature && f.temperature.max && f.temperature.max.celsius !== null ? Number(f.temperature.max.celsius) : null,
+            min_temp: minTemp,
+            weather_code: 0,
+            temp_anomaly_max: 0,
+            temp_anomaly_min: 0,
+            telop: f.telop ?? "",
+            is_tropical_night: minTemp !== null ? minTemp >= 25 : false,
+          };
+        });
         forecastCache = forecasts;
         cacheTimestamp = Date.now();
         setForecast(forecasts);
@@ -165,12 +170,38 @@ export default function WeekPage() {
                   const dateObj = parseISO(d.date.replace(/\//g, "-"));
                   const dow = format(dateObj, "E", { locale: ja });
                   const mmdd = format(dateObj, "MM/dd");
+                  
+                  // 気温基準ラベルの判定
+                  let dayTempLabel = "";
+                  let dayTempLabelColor = "";
+                  
+                  if (d.forecastMax !== null) {
+                    if (d.forecastMax >= 35) {
+                      dayTempLabel = "猛暑日";
+                      dayTempLabelColor = "bg-red-500 text-white";
+                    } else if (d.forecastMax >= 30) {
+                      dayTempLabel = "真夏日";
+                      dayTempLabelColor = "bg-orange-400 text-white";
+                    } else if (d.forecastMax >= 25) {
+                      dayTempLabel = "夏日";
+                      dayTempLabelColor = "bg-yellow-300 text-gray-800";
+                    }
+                  }
+                  
                   return (
                     <div
                       key={d.date}
-                      className="flex flex-col items-center justify-between py-4 px-2 w-[60px] md:w-full min-w-[60px] md:min-w-0 select-none"
+                      className="relative flex flex-col items-center justify-between py-4 px-2 w-[60px] md:w-full min-w-[60px] md:min-w-0 select-none"
                       style={{ flex: "1 1 0%" }}
                     >
+                      {/* 気温基準ラベル（左上） */}
+                      {dayTempLabel && (
+                        <span className={`absolute top-1 left-1 text-xs font-bold rounded px-1 py-0.5 ${dayTempLabelColor} z-10 shadow-sm`}>{dayTempLabel}</span>
+                      )}
+                      {/* 熱帯夜ラベル（右上） */}
+                      {d.isTropicalNight && (
+                        <span className="absolute top-1 right-1 text-xs font-bold rounded px-1 py-0.5 bg-purple-500 text-white z-10 shadow-sm">熱帯夜</span>
+                      )}
                       {/* 日付＋曜日 */}
                       <span className="text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">{mmdd} ({dow})</span>
                       {/* 天気アイコン */}
@@ -178,7 +209,7 @@ export default function WeekPage() {
                       {/* 最高気温 */}
                       <span className="text-lg md:text-xl font-bold text-orange-500 leading-tight mb-0.5">{d.forecastMax !== null ? `${d.forecastMax.toFixed(0)}°` : "-"}</span>
                       {/* 最低気温 */}
-                      <span className="text-base md:text-lg font-semibold text-blue-500 leading-tight mb-1">{d.forecastMin !== null ? `${d.forecastMin.toFixed(0)}°` : "-"}</span>
+                      <span className={`text-base md:text-lg font-semibold leading-tight mb-1 ${d.isTropicalNight ? 'text-purple-500 font-bold' : 'text-blue-500'}`}>{d.forecastMin !== null ? `${d.forecastMin.toFixed(0)}°` : "-"}</span>
                       {/* 過去平均・差分 */}
                       <div className="flex flex-col items-center text-[10px] md:text-xs text-gray-400 mt-1">
                         <span>過去:{d.historicalMax !== null ? `${d.historicalMax.toFixed(0)}°` : "-"}/{d.historicalMin !== null ? `${d.historicalMin.toFixed(0)}°` : "-"}</span>

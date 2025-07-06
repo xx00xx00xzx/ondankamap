@@ -67,4 +67,5 @@ export interface WeatherForecast {
   temp_anomaly_max: number;
   temp_anomaly_min: number;
   telop?: string; // 天気名（livedoor/気象庁API用）
+  is_tropical_night?: boolean; // 熱帯夜判定（最低気温25度以上）
 }

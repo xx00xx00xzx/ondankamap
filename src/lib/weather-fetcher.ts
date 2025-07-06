@@ -28,13 +28,16 @@ export async function fetchAndSaveWeatherForecast() {
     
     // 各予報日のデータを保存
     for (const forecast of data.forecasts || []) {
+      const minTemp = forecast.temperature?.min?.celsius ? Number(forecast.temperature.min.celsius) : null;
+      
       const record: WeatherForecastRecord = {
         saved_date: savedDate,
         forecast_date: forecast.date,
         date_label: forecast.dateLabel,
         telop: forecast.telop,
         max_temp: forecast.temperature?.max?.celsius ? Number(forecast.temperature.max.celsius) : null,
-        min_temp: forecast.temperature?.min?.celsius ? Number(forecast.temperature.min.celsius) : null,
+        min_temp: minTemp,
+        is_tropical_night: minTemp !== null ? minTemp >= 25 : false,
         chance_of_rain_00_06: forecast.chanceOfRain?.T00_06,
         chance_of_rain_06_12: forecast.chanceOfRain?.T06_12,
         chance_of_rain_12_18: forecast.chanceOfRain?.T12_18,
@@ -49,11 +52,11 @@ export async function fetchAndSaveWeatherForecast() {
       await db.run(
         `INSERT INTO weather_forecasts (
           saved_date, forecast_date, date_label, telop,
-          max_temp, min_temp,
+          max_temp, min_temp, is_tropical_night,
           chance_of_rain_00_06, chance_of_rain_06_12,
           chance_of_rain_12_18, chance_of_rain_18_24,
           weather_detail, wind, wave, image_url, raw_data
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           record.saved_date,
           record.forecast_date,
@@ -61,6 +64,7 @@ export async function fetchAndSaveWeatherForecast() {
           record.telop,
           record.max_temp,
           record.min_temp,
+          record.is_tropical_night,
           record.chance_of_rain_00_06,
           record.chance_of_rain_06_12,
           record.chance_of_rain_12_18,

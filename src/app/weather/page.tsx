@@ -182,33 +182,41 @@ export default function WeatherPage() {
             const isAbnormalMin = minTempDiff !== null && minTempDiff >= 2;
             
             // 気温基準のラベル
-            let tempLabel = "";
-            let tempLabelColor = "";
+            let dayTempLabel = "";
+            let dayTempLabelColor = "";
+            const isTropicalNight = minTemp !== null && minTemp >= 25;
+            
             if (maxTemp !== null) {
               if (maxTemp >= 35) {
-                tempLabel = "猛暑日";
-                tempLabelColor = "bg-red-500 text-white";
+                dayTempLabel = "猛暑日";
+                dayTempLabelColor = "bg-red-500 text-white";
               } else if (maxTemp >= 30) {
-                tempLabel = "真夏日";
-                tempLabelColor = "bg-orange-400 text-white";
+                dayTempLabel = "真夏日";
+                dayTempLabelColor = "bg-orange-400 text-white";
               } else if (maxTemp >= 25) {
-                tempLabel = "夏日";
-                tempLabelColor = "bg-yellow-300 text-gray-800";
+                dayTempLabel = "夏日";
+                dayTempLabelColor = "bg-yellow-300 text-gray-800";
               } else if (maxTemp <= 0) {
-                tempLabel = "真冬日";
-                tempLabelColor = "bg-blue-500 text-white";
+                dayTempLabel = "真冬日";
+                dayTempLabelColor = "bg-blue-500 text-white";
               } else if (minTemp !== null && minTemp <= 0) {
-                tempLabel = "冬日";
-                tempLabelColor = "bg-blue-300 text-gray-800";
+                dayTempLabel = "冬日";
+                dayTempLabelColor = "bg-blue-300 text-gray-800";
               }
             }
 
             return (
               <div key={dayForecast.date} className="bg-white rounded-3xl shadow-xl p-6 relative">
                 {/* 気温基準ラベル */}
-                {tempLabel && (
-                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-bold ${tempLabelColor}`}>
-                    {tempLabel}
+                {dayTempLabel && (
+                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-bold ${dayTempLabelColor}`}>
+                    {dayTempLabel}
+                  </div>
+                )}
+                {/* 熱帯夜ラベル */}
+                {isTropicalNight && (
+                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-sm font-bold bg-purple-500 text-white">
+                    熱帯夜
                   </div>
                 )}
 
@@ -247,7 +255,7 @@ export default function WeatherPage() {
                   </div>
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-gray-600">最低気温</span>
-                    <span className="text-2xl font-bold text-blue-500">
+                    <span className={`text-2xl font-bold ${isTropicalNight ? 'text-purple-500' : 'text-blue-500'}`}>
                       {minTemp !== null ? `${minTemp.toFixed(0)}°C` : "-"}
                     </span>
                   </div>
