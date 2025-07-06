@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+}
+
+html, body {
+  font-family: 'Inter', 'Zen Kaku Gothic New', 'Noto Sans JP', 'Montserrat', sans-serif;
+  color: #444;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+.font-sans {
+  font-family: 'Inter', 'Zen Kaku Gothic New', 'Noto Sans JP', 'Montserrat', sans-serif;
+}
+
+h1, .h1 {
+  font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+  font-weight: 900;
+  font-size: 2.5rem;
+  letter-spacing: 0.15em;
+  line-height: 1.15;
+  margin-bottom: 1.2rem;
+  color: #333;
+}
+@media (min-width: 768px) {
+  h1, .h1 { font-size: 3.5rem; }
+}
+
+h2, .h2 {
+  font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: 0.10em;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: #444;
+}
+@media (min-width: 768px) {
+  h2, .h2 { font-size: 2.5rem; }
+}
+
+h3, .h3 {
+  font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  margin-bottom: 0.8rem;
+  color: #555;
+}
+
+h4, .h4 {
+  font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  margin-bottom: 0.6rem;
+  color: #666;
+}
+
+p, .body {
+  font-family: 'Montserrat', 'Noto Sans JP', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+small, .small {
+  font-size: 0.92rem;
+  color: #666;
+  letter-spacing: 0.04em;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #60a5fa;
+  letter-spacing: 0.08em;
+}
+
+.accent {
+  color: #fbbf24;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/web/Inter-Regular.woff2') format('woff2'),
+       url('/fonts/extras/ttf/Inter-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/web/Inter-Bold.woff2') format('woff2'),
+       url('/fonts/extras/ttf/Inter-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zen Kaku Gothic New';
+  src: url('/fonts/ZenKakuGothicNew-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zen Kaku Gothic New';
+  src: url('/fonts/ZenKakuGothicNew-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- NASU風モーション --- */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fadein-slow {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes lift {
+  from { box-shadow: 0 2px 8px rgba(0,0,0,0.04); transform: scale(1); }
+  to { box-shadow: 0 8px 32px rgba(0,0,0,0.10); transform: scale(1.03); }
+}
+
+.animate-fadein {
+  animation: fadein 0.8s cubic-bezier(.33,1,.68,1) both;
+}
+.animate-fadein-slow {
+  animation: fadein-slow 1.2s cubic-bezier(.33,1,.68,1) both;
+}
+.animate-lift:hover, .hover\:animate-lift:hover {
+  animation: lift 0.3s cubic-bezier(.33,1,.68,1) both;
+}
+
+/* カードやボタンのホバー拡大 */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s cubic-bezier(.33,1,.68,1);
+}

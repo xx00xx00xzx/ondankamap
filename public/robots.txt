@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# サイトマップの場所
+Sitemap: https://ondankamap.vercel.app/sitemap.xml
+
+# 検索エンジンに優先的にクロールしてもらいたいページ
+Allow: /
+Allow: /data/
+
+# 不要なファイルのクロールを制限
+Disallow: /_next/
+Disallow: /api/
+Disallow: /.git/
+Disallow: /node_modules/
+
+# クロール頻度の調整
+Crawl-delay: 1
