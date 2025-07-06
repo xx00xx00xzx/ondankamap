@@ -57,8 +57,8 @@ function getMMDDfromDateStr(dateStr: string): string {
 export default function WeekWeatherSection() {
   const [forecast, setForecast] = useState<WeatherForecast[] | null>(null);
   const [rawApiData, setRawApiData] = useState<TsukumiForecast[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setLoading] = useState(true);
+  const [, setError] = useState<string | null>(null);
   const rawData = temperatureData as TemperatureData[];
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
